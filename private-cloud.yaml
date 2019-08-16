@@ -1,0 +1,394 @@
+##################################################################################################
+# Productpage services
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: productpage
+  labels:
+    app: productpage
+    service: productpage
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: productpage
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: productpage-v1
+  labels:
+    app: productpage
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: productpage
+        version: v1
+    spec:
+      containers:
+      - name: productpage
+        image: docker.io/maistra/examples-bookinfo-productpage-v1:0.12.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: productpage
+  name: productpage
+  selfLink: /apis/route.openshift.io/v1/namespaces/hello/routes/console
+spec:
+  host: productpage-${NAMESPACE}.${LOCAL_CLUSTER_IP}.nip.io
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: productpage
+    weight: 100
+  wildcardPolicy: None
+---
+##################################################################################################
+# Reviews service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: reviews
+  labels:
+    app: reviews
+    service: reviews
+  annotations:
+    proxy.grs.github.com/network: myrouter
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: reviews
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: reviews-v1
+  labels:
+    app: reviews
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: reviews
+        version: v1
+    spec:
+      containers:
+      - name: reviews
+        image: docker.io/maistra/examples-bookinfo-reviews-v1:0.12.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: reviews-v2
+  labels:
+    app: reviews
+    version: v2
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: reviews
+        version: v2
+    spec:
+      containers:
+      - name: reviews
+        image: docker.io/maistra/examples-bookinfo-reviews-v2:0.12.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: reviews-v3
+  labels:
+    app: reviews
+    version: v3
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: reviews
+        version: v3
+    spec:
+      containers:
+      - name: reviews
+        image: docker.io/maistra/examples-bookinfo-reviews-v3:0.12.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+apiVersion: v1
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZkRENDQTF3Q0ZFVlV2UW81SllSNUVDYWZsVTcyK2FOcFJmTGhNQTBHQ1NxR1NJYjNEUUVCQ3dVQU1HUXgKQ3pBSkJnTlZCQVlUQWxWVE1SRXdEd1lEVlFRSURBaE9aWGNnV1c5eWF6RVJNQThHQTFVRUJ3d0lRbkp2YjJ0cwplVzR4RmpBVUJnTlZCQW9NRFZSeWRYTjBJRTFsSUVsdVl5NHhGekFWQmdOVkJBTU1EbFJ5ZFhOMFpXUXVRMEV1ClkyOXRNQjRYRFRFNU1EZ3dNVEl3TWpjd01Gb1hEVFEyTVRJeE5qSXdNamN3TUZvd2dZZ3hDekFKQmdOVkJBWVQKQWxWVE1Rc3dDUVlEVlFRSURBSkRRVEVXTUJRR0ExVUVCd3dOVTJGdUlFWnlZVzVqYVhOamJ6RVZNQk1HQTFVRQpDZ3dNVW1Wa0lFaGhkQ0JKYm1NdU1UMHdPd1lEVlFRREREUnBiblJsY2kxeWIzVjBaWEl0WkdWdGJ6SXRZVzF4CkxtRndjSE11YzNWdGJXbDBMbk41YzJSbGMyVnVaeTF3ZG5RdVkyOXRNSUlDSWpBTkJna3Foa2lHOXcwQkFRRUYKQUFPQ0FnOEFNSUlDQ2dLQ0FnRUFtamcrdkNLbGJQMFoxUFRPV1UxL1dVL1NhRUpRVnpzM1p2NzNwWUxiVnIySwpBT2p6TDd0V2hpbldKS2JGK2xJWFBocVRSTUZpRDRsdE9wb1g2Rm0rZkU3WEI3Zk5rd25qYVJ0cEJXTzI3TjhxCnFoUDVkSnVhREZubWRzZnJJNlNtSEpJUDVES2xKQnErSlpEcHBSYWtpUU15aDFETzR5SXYwMU0vOTNydXZDR3QKa1M3R09rV0o1SlU0ZUFsTVdBSlA4YmFyVXFSVHc2eTBJUUgrWlNBd0xWVUtNN2NDRWFpeTNYRGoyYmtPU2VNaApKdVZEMy9pQTdWSXAvbFZoNkc2N0xsc1Vud1NScE1GRTZ6Y0llb0ZzZ3AxMVZKRHBiU3BHVmlnRndReFdwU1NSCnFiVysxOFZwUU9OT2dKYkt1eHBGaXl1YnhaczNUbS8yK3dxY3hzQ0RSV2VHdDI5d3I2TEZ6UXN4aGcyTjNOUUwKZlR5QmlScUpwM1RiY0JpcXhuQjBjRUpnZDAwOUdTMFVRNWcxck8wMlZFVE8zREtEd1pnWjd6SWVGUzlZS1BnQwpwMGFSdjNQdEFuTkVuK0szRUZWci96NCtJVElYR1lvTjVETStEckdyUk9MTmF5SzlyR0grVkdjU29xQVpqV3B5CkVLeWpwbWhxYmxVOHpMMkVtc0JEeTl6UzFKYisrQjdVdi9GOFlWVDBCS2F1MnBCK3dOc1RVNHBCM2hJd1dqN0YKZndHSVpOOHhTeFcyYkw5cHhNY1IweXZtK25xQ0hsdDBJNnFzTXR6YzlOVGZ4RTNOWUNmRlZkVW5WcWY1dWNGUwpaY3hHT0lFODk1azRjc3dmTUxlTkFrOU5MbFBVMGNEa1JZNVJzaWNYWFRzS0JkbG5sU25iZnlyMFJzNmFmeGNDCkF3RUFBVEFOQmdrcWhraUc5dzBCQVFzRkFBT0NBZ0VBbC9LSkQ4bS9yWE0zaFRxczVUTzYrVE5TWXA4NDVwTUwKbnBBbFMzMS8wSVg2akM1N3oxakVQQUxNNERFVXNBSVcyZzVyYkZ3a3NGZlpoT0REUXBtRXE1YlVmbjg5VE13cQpleGUzY0hXVTI0UnVEVENmZXlsR1U0R2pLT1NuVlBNb1JPNERkQUl5VGFndjBWdGlmOW5NdTA4UTFOS05wc3BkCjA2dHg3K2JEU0JCaTVqU0d5aFlabC9vZUZGV2xORzgwSjN6ME1MdXZDMDFuK3AxRExxak1VTlBEMkh4Si9GNS8KK3FoeUovaDl0TDRrc3JtK29xSW83R0pRYlhZU3Q4ekFjdkVsYWtBcFhFSmE0QW1iWkgrUlVRazYvSHJ6N0kwcQpkaXM5czR3YWJCY3pIc2NiMm9FRHpCeFk4VENKeHR1LzNlUHJxY29ubUliTHAxMDBYYmxRb0x0MERvNFB3SnFUCnYvUm9BUXNEQ3k0Tm0yT3krR2FuS2JPb3FKbVhOczhxVEVya0o4cnJpRU5GUk9SQ3daRkg4QnE4cjlPdnRUaksKZkp2SVgwMlZMTkpRUFNiejlTUVpENTNKUE91ekhNSXRJWnZteVlTR3BEK2NvdGxUbVBGUjRzR0J0bGRlZXpSQwpxWk5ZUllSSmRLZ0dySElLdDQ3L3VzMXVXVnByejJXc2l2Q0hVMzVUVHI2aXJkMW1Ia3hhcElwWWlUNnlBMVJQCjFRN25ubVV5UjNja0NiQzRpVEE3Mmo2MG40OU1qS2syOXo1aW9NSnRxaVJMdEdyU042VnVsUkFGYUZack45aGcKVUN0NlJCM29vMlhaNDRCNHJwTmRaOXR4aVN4UTNjNnJrbFZqWE9Ic1JPdEVXTXVnQ1NINmI4by9TMFhwNVlDVQpaZ0Q4SldhTE4rMD0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpQcm9jLVR5cGU6IDQsRU5DUllQVEVECkRFSy1JbmZvOiBBRVMtMjU2LUNCQywwMTkxQ0YwMjlEQzE5MzI5MUVFQjlFMzlGMDRBMDBFQwoKckNydUt3UCtVQjNKV25YbTZ6ak15ZXpuWDh1cncwd1YrRkt1UERVVWtkeVpMTzVmZ25LWksvNFFJN0F2WGp3ZwpIaklINUl4TkdnM00xWGo5czE1aU1USjR1bU05UUxKeHYvbkU2RHlFcXlJQ2w5ZjRMdy9RMzlwY1VnYUVJZXlQClErSmNuekQ0NzRPQUFGY1J1bDFjZHBxL2pXRWJnOUZ3Z0RCWG9jN0NJY2xoeHd4UFZObkVycUFDNGdKNHNyUzEKdkI1QzVsVmtYejdMd09yT1lET2lnc1JRTkR3T2dTYzczMDNnSnRpSEVXcHJ2YkxoNXd6czhGNUJqRXMraXhxcgpGd2FSeGlKZEZROHBwMW9QL1NkUlhFZE9nNDF2NW03RmtrUW5vdHpYL1FUMWhuaCs4VGJHRzhuMWpZZzlrdDFWCkh0S3Y0aXNvakpBRGJoVmdkL09yb1J5b2wySlpqR2JSTjZVR01WT0RIQUNtenVGZThydzQyVEZtcm9QTXVMQUgKVmtxaTB0d0VobGlMM0c2TlR5SUMxMEJPOTMwZW5HaVpKZW9Ga1UrK1c2UjN1dEdLOU9jaVN2MGxWWDI0cm5qUwpIaC9QZHNSOTBiRTlEbGMwNzZoZnd0dlNMQjFMc0UxYVFQdlJFVWpnaXRYbC9qTEdLQ29kWko2ODJiQnBwWmlSCnRvVldKSEQyMGFkY2wveFV3K0Ryb3FoeUdnV2Jpd2NKeUZtU1BNQ1FyYWpKdkNUc2ZXV1JGNVNPdmJFb3RROXoKWUVWRmJjN2RncVV6ZlU0TUZPTTJIVWtQL3lrYzBtemxpbUEyN0dTZDBsWTBoNyt6SnUwU1FxRjh0TUxuUzAvRwp6WllwNEdHTHViZlVHTDJ1YW9NQ2haWDU1VmtEVFVlUnQ2ZFcvUG1BM0lNTjdKcVJydnE4S2k5dHFzTVVLVGc4CnU5cGFacmg3V2grakV6L2s5bndGaERVRk5FeUVPNS9DYmtlZS81MzM2aE9KdXlNY1lzUEJoZDZvUnZTT1B3OHMKaTI2dHErb1poMWVYM3VDTS84M0xRcGtEV0JaejFIT25lTzFsNEZvSEpHZjY3SStLZkJ3MjlVTkF0ZFRKK2JIdQpDdXAweXlxcG5DdU9OQkZvdXBkYStPV2RyRGJtYXlqVWFobUtYaDRoZjZ0V0hUcmpGcVRmY2pKd0NXMkt0WHg0CkRsUHpiYzlFTUZJMDNFUmNFYTlHaVl5Yk9hK3RDeW9WNDRiakRMR0RSMWt4emEzVzV3OEpOV0JPNTRobFNWWDcKRGFOLzhvMmthMnNVZ1ZYVDRMaTFKRmozQjFQVVpHSUZIUU84dmFIZkw0VzRrYlZKVVJzOC9FZG8zVGE1N1Y3dQpzb2NlOW5kK3pjZ3A3T25GTzltZHh6YTMyKzVEeVNuR21oRytvU1ZGdUwyNXFpTExiY25YQUlmOHhMSncweHlxCjQ3Qi9OVm5mQmtrOE5SWVBYTjZhZUxQRTRYMXFIb0NoYnYrSGQxRHlsNnloZ1p4NHVTaThqSWI0NzIxWVJvM0IKNFhwb1BESDA0aE9lVnBnR2cyZUpsYUk3NVJST01WcG1IcUNKZHFqai9oSTk1blh3bnJFSC8rY0lvVGJLYVJvUgprZXRjR1JyT090UXNpQzBPd2FXSlRFZFZZeE1kbE1ubjNiV1hCaTBteWx6c0Y3aEUvMWpac01MZ3lUbFZZWGFnCk9IVlhHWUZ4TFlZL3ROYndnTy83V2FOaFNwK09EMWVKc1JUbm1OZHVLdUkrNHFDYXlHVjFBQ08zaUlpSEFpdUMKc2VDeVVBU0IrSVQyYVZGNnFiZm5QNDFBMlRBdWo5SHFEY0pFYlRhR1o4WU0xT3lxNHlBVWU3T1ZERkdPbVUxLwpVQ3g0R3RSbnZlUWVoOXl5eWFYYW9zZDhncXJERXIva3ZYZG8rNSszYkp6dzVjVFRlY3dOT1VXbk9mdVlMY29VClVOSzN4SG10V1dBTUJzT3dncWdBZ0hoeVZpTzM3WDZGcTF6RkJWRFRIeWZweWF2dVZkVTYzNFFIVGlOV2pSY2sKeTVLVWJyaENkOUhhSk1ydGJJMUdPbTU1ckpVZGs0YUl6QnorOXo3Y1RzN0s2Tk1pUlVkT0Ywc1VBYTVKaktaaQpKTTBBOUVhQlEvWFhrY1dTMEZwb05PeXVOSHRNK1lPSTd6eU94dlZ2UEdhbW5Zb1NlNXIrbWNTME1HMGtsaGFrCnBnSUM2dE1sUXRPbFZUQ21yaDVYNVZwNVM4MG9iZ2VhVTZEVlhNcVFFSnBkNFFWWEF2R0VLMC9nZnFxenBjWUQKb01UQ1VJTHNjNkNIV2NvcVBsVThMbXlnM3gzQnRCaURCQ3pScEJoNGFsVmJMMkN6bnBoK2F4T1J3SzRIaWVmRQovQlpoUEZRNEFKVVhFVTYvNEY0bjhIdXNUdEp0amdNQlk2czI0bDRJNXRYdHRXR0ZobWc5eDZIS0NqRHJDZjZICkF1bzdhc3lFQjZkczJ4bk9sdzNlcEJCRHZjQVpKSEJCVjFTR2IwdGVId2VYekE4cDdzQTFsL1M1YTQxa3FkeDkKdHdrZVJIZitzTzZuRmVldk5VZ1MxbThXL1cxMUU1b2tmditMYTR6eno5UnpoSlZPQndSSnV3L1Ixd1Q4RjNmTAozS05BRVlvNGZENEQ5dFV3cGt5aW8vcXJPSWhVYlhuVlZwZ2U5dk1PLzVqb0Qvd2JYZitvSDlHVG1OajV5WVpxCmFRRmo1aWFlN1A5VUd4MGdkUlRLQmsvenZ0T0tzazlFMTIvaFMrbU05MkNHc3Z2L1MvMndjR0tYOFdSeUd2bjkKc2thYnN5NXpYem5lUHpYZFptMnd4c29odGphYllSdERBZk5EakswM1l5SzYvR0RYTzdIOFdEdXAxZFZnSFFjRQord1hUeTRYUzJTdy9BQXNOQitOSXdaVEc5ckNuL0NKUGJBdjZMVXFkKzlVRUNEb3NWcE9nU1RNUldHNldhZWhFCjNraUY0VlJnN0orTWtpMm96dzJtcEhwaU51TDFZK0c2QWNKV08zMW5tVlQ4OGxFSkpjTU40MXFyVWpNVllNSWcKa3Boa2t5ZkZneXFXREc5a1l3a3lKSVFOUTZjWUhlM2h6U0FMaENuWFMxY1h6elJjdGVqREZzTmV2QVpPR0dHYQo3c3JrL0lzeHY3UldPTS9DYTBaSkprSDlRY21GWlZpVXNlUjlrdG13ZzdLeGpERXJwdGlMb3RVVHN2TFFQNHl0CmMxNnF1SndEenBtL1ppYlJvcVVHYktGc01TRmJuVUkrZTAyUThIaGxVRitHbXZsaGVTM0NxNWpYNk9VSVR6UE4KRFFjNmErN2xPUmJucnp1NDZyT3lyTm5ZRE9idEM0UWRPb0Z0TS9Lcm81bXBnVGJwbUVmaXJ4U0M2ZWk1Z01UbwpoR3ZQL296UGtuUlJNcTErWEZacW9uNDZpM0QyblhKaUxGMWVaYzFvOEI4bHJpZUhsSFBudzlXU25hcFY3c01OCmthZ3RTWStwTnU1c3RFY01pTWc2eXNSTkdnbENVb0xXM2JVWFNPU2Zra3g4MUxmUFBKZjRiRUxJK0NncFZQdDQKR3Fsa3F0OGRURDBuVDgrb2VuR2tLajkydjdRRGxhTzBWM0YyZFNBa1U3aGlCSTQrR2dUaGRxQjYzWEJxbUc5aQpWaStMM1NEV1B0UFB5YmZZaFM4Y0EwQWJTcklORk9KK244UndLZ0pTSjFEenBZamR0YUd2Qk42OUhRNHd6czVXCnBJS0tzamVRVTdKRXcwSGYvMWcyYzdoKzRkSmhYR0tFUGpaU3ltZTVqc2dGZzEyelVKcFErWDdZTXhOVU5tZ1EKT1YzdnNOVkpPY3ZNWFF6djkzbG92NG56VXNyYlE5NVJvWVdoUElEKzNnTUl1WU5hUlUrOURQVllHRnBiYngycgp6dlB2d2E0bGN4UVMrV2N6UWR4ZHY3cVdYUm4yNDY0SWhIdklKUEZ5NjA1QzFiR1d5S29qdzVmZy9BWVdqMXByClpyODhobWJlamxxQXJzOG9DcnprS0NaNGlnSlpCRTZXNmRtT0U2VTM0YkZaOTkrbkNncjFtbHdNb3FRdU56OC8KUzA3NlZLakJGRjFzVmpiWkhUem1Dc25zMDRDREx4SVJ1SXBvNnRIbU1NbXBGR0RwUmttdFpGUlNxU2QrYVA1VgotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+  tls.pw: cHZ0LXBhc3N3b3JkCg==
+  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZxekNDQTVPZ0F3SUJBZ0lVQzk0SkQrS0FCenpaQ0JWOEkzYVozVGVhSW1Rd0RRWUpLb1pJaHZjTkFRRUwKQlFBd1pERUxNQWtHQTFVRUJoTUNWVk14RVRBUEJnTlZCQWdNQ0U1bGR5QlpiM0pyTVJFd0R3WURWUVFIREFoQwpjbTl2YTJ4NWJqRVdNQlFHQTFVRUNnd05WSEoxYzNRZ1RXVWdTVzVqTGpFWE1CVUdBMVVFQXd3T1ZISjFjM1JsClpDNURRUzVqYjIwd0lCY05NVGt3T0RBeE1qQXlOalU1V2hnUE1qSTVNekExTVRVeU1ESTJOVGxhTUdReEN6QUoKQmdOVkJBWVRBbFZUTVJFd0R3WURWUVFJREFoT1pYY2dXVzl5YXpFUk1BOEdBMVVFQnd3SVFuSnZiMnRzZVc0eApGakFVQmdOVkJBb01EVlJ5ZFhOMElFMWxJRWx1WXk0eEZ6QVZCZ05WQkFNTURsUnlkWE4wWldRdVEwRXVZMjl0Ck1JSUNJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBZzhBTUlJQ0NnS0NBZ0VBc1lSdVd4MEpqdE9zTmZ1My96VUoKV1ZvY3lWaU9zQ1gvbVgrbXB0dVFUQWJaSjJWbkk4Q0xvczlucThXcHNyWVdMV2c2TDZCd3VHT0c0d21ycHRSdgoxT2xNWDdOUjhJUUdHZDFaekd0S3laNUM0b08zTGcwK0VyZlc3NHc4SDA2RWNEb3NEcUdqQ1JSbzlxMnUzVS9ICnJGRWYyVmZrK3dpTWhSZ21ON2dubE02cm42SEUzSCt2WkdQOEVNS2k3RWlYS3k5Y1YxR2RMT0FEWXk0d0M0Z0wKRDNTM1I2TUMzTnB5Q0VOS1FLODVYc1pPNWlENXU3Qy80cHVvOENtVnBHRXNMZDN4ZnVVY1huYUJBSGlEZllwbApOSnV2ZmtPbmpSZXZFVC9PUzRkdk5QdUcwU0tXNUkwaXZQL1dCK044ajJ1Qm9CSzFXQy8zR1plMHkxd0Z0NUlFCmp6SjZtd0JaUExIaUxsdDMwcUFiVUZVWmlVVlI4R1djcjN1ZU5FY1RhMHhJZkN4M2hwKzZLWTJEWjNTMWRZS1gKVFMzaE1GcUVZaUxsbjNMbS85a2FGUW5jSXlIUVR3ODZzWFBhVGlGdVAwMStWQjc2WW92WWs3OWFGU29XdjlSNwpCMzM5bXl4NXEyeGxudWFvOElyUloxZW13YW9FTEZVOTV6WDBMdVJQaWhvNTZjR2k2Z3RvQTh5OUU3SHo0TjBKCjcyU3o3QkNYMUFZN2VKbm1lUDZYSmpXYktSdDQwWS9jc0h5SzNqSllXNE00dHcwKzlZNEZzUGN2MnFtSTRRQkMKTDFmWlh2RkpOWWc2V2J2ajM4anpiVFJCNVVLZDNsV2svUkRjaEFPMnB4V1pKcUdZSVlMbjNIV2FuSUFiaTl1cApDMGtpOFhhNEs4NkdFRUpUdVc0QmxVc0NBd0VBQWFOVE1GRXdIUVlEVlIwT0JCWUVGQTRZMXZLMUlqSlBmYUdSCmlvSWtsM1MrWXJSNk1COEdBMVVkSXdRWU1CYUFGQTRZMXZLMUlqSlBmYUdSaW9Ja2wzUytZclI2TUE4R0ExVWQKRXdFQi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dJQkFJeG1DUjJlelBGUjY4VmpIQkpsQXpYTApNeHg4cjBpeDY3TitWM3h3dER6TW1sZmtHdU9jamw4V3IybzR1NkxQM0Nvb0kzNGFVaGtYTjd0M2hkUlJZOHJxCno4dFdORW5hZXR1b2ZrRWlNMTFhRjBOa1dPd3VQU1ZnOGNlbDVtWXFLZ3lXWnlteUY3NE9nbEhOQmxyMXhxdkEKNUJPckhUY0xCMXJaSjdqVHV3bTRoNXUyUkpsZlhnaDRVZlF1QXMrRGYzNG9adXo0Rnczckd2T0hhTk4wSitUYgpYQy9YUkZocFdnZG5KQWd1ZjBvcDlrL3hpTVZlM0dVWThTRTFXMk1WS1VyMUZYQXFwdCtsS2dXYWZvUUsyK3h0ClpCZjNXS2pEYURBMmFlVXErOFQwWWQvTFhJeU8zSkdJczR3N1YyQk9VMWZQY0daMitodjZpdEk2bi8rYStlYmsKNmdWTHdlWWhWVjRrYUl2dk5kQS94bGZLUmhTcGw0N1lIM2FqNnhnQlVTOXVCZEx5NzNsNXFqMHlOUEdGeFJ4ZQo1Wjh3c0V4TTdVNXJiczRFWkRIaitPTjB0Sjd5OXAzRGFSdUMxWjIxczQ5RE1ENy9RckZCQUNEamZoYWp0T051ClUzUCtxTHFTUmVDU2NRem9aSUNrU29FczZXc2QvWE42QnlnWUZJYjQvUEQwY0krbnY4bERldnVuRVZldTRGZUUKRTMybGZoZDV2bDBZNjVhdjNSQVFmTUFjd1N4YTlLbVFyVGlWMTN0MGYwSUQrV0hUTXFMbHVKWU9UaEpacHNUeApSZzRBVUpINUNSNUJwWGI1Y2FpbWhTNG80aG5pOTRRYm5GSHRHMTc2aTYzOHhMaU9CUUV4K2NyWGxwSFAxK2xHCit3RDB6UXdxeDFud2FGQ0lVRnNPCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+kind: Secret
+metadata:
+  name: qdr-internal-cert
+type: kubernetes.io/tls
+---
+apiVersion: v1
+data:
+  qdrouterd.conf: |
+    router {
+       id:PVT
+       mode: interior
+    }
+
+    sslProfile {
+       name:ssl-profile
+       certFile: /etc/qpid-dispatch-certs/internal/tls.crt
+       keyFile:/etc/qpid-dispatch-certs/internal/tls.key
+       passwordFile: /etc/qpid-dispatch-certs/internal/tls.pw
+       caCertFile: /etc/qpid-dispatch-certs/internal/ca.crt
+    }
+
+    listener {
+       role: normal
+       host: 0.0.0.0
+       port: amqp
+       saslMechanisms: ANONYMOUS
+       authenticatePeer:no
+    }
+
+    listener {
+       role: normal
+       host: 0.0.0.0
+       port: 8672
+       saslMechanisms: ANONYMOUS
+       authenticatePeer:no
+       http: yes
+    }
+
+    connector {
+       name: to_AWS
+       host: inter-router.${NAMESPACE}.apps.${OPENSHIFT_CLUSTER_NAME}
+       port: 443
+       saslMechanisms: EXTERNAL
+       sslProfile: ssl-profile
+       verifyHostname: no
+       role: inter-router
+    }
+
+    address {
+       prefix: closest
+       distribution: closest
+    } 
+
+    address {
+       prefix: multicast
+       distribution: multicast
+    }
+
+kind: ConfigMap
+metadata:
+  name: qdr-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myrouter
+  labels:
+    app: qdrouterd
+spec:
+  ports:
+  - port: 5671
+    name: amqps
+  - port: 5672
+    name: amqp
+  - port: 8672
+    name: console
+  - port: 55672
+    name: inter-router
+
+  selector:
+    type: qdrouterd
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: qdrouterd
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: qdrouterd
+        version: v1
+        type: qdrouterd
+    spec:
+      containers:
+      - name: qdrouterd
+        image: quay.io/interconnectedcloud/qdrouterd:1.8.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5672
+          protocol: TCP
+        volumeMounts:
+        - name: qdr-config
+          mountPath: /etc/qpid-dispatch
+        - name: internal-certs
+          readOnly: true
+          mountPath: /etc/qpid-dispatch-certs/internal
+      volumes:
+      - name: qdr-config
+        configMap:
+          name: qdr-config
+      - name: internal-certs
+        secret:
+          secretName: qdr-internal-cert
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: qdrouterd
+  name: console
+  selfLink: /apis/route.openshift.io/v1/namespaces/hello/routes/console
+spec:
+  host: console.${NAMESPACE}.${LOCAL_CLUSTER_IP}.nip.io
+  port:
+    targetPort: console
+  to:
+    kind: Service
+    name: myrouter
+    weight: 100
+  wildcardPolicy: None
+---
+##################################################################################################
+# Ratings service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: ratings
+  labels:
+    app: ratings
+    service: ratings
+  annotations:
+    proxy.grs.github.com/network: myrouter    
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: ratings
+---
+##################################################################################################
+# Details service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: details
+  labels:
+    app: details
+    service: details
+  annotations:
+    proxy.grs.github.com/network: myrouter
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: details
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: myrouter
+  labels:
+    application: myrouter
+type: Opaque
+stringData:
+  connect.json: |-
+    {
+        "scheme": "amqp",
+        "host": "myrouter"
+    }
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: icproxy-deployer
+  labels:
+    application: icproxy-deployer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: icproxy-deployer
+  template:
+    metadata:
+      labels:
+        application: icproxy-deployer
+    spec:
+      serviceAccountName: icproxy-deployer
+      containers:
+      - name: deployer
+        image: quay.io/gordons/icproxy-deployer
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: icproxy
+  labels:
+    application: icproxy-deployer
+---
+apiVersion: v1
+kind: RoleBinding
+metadata:
+  labels:
+    application: icproxy-deployer
+  name: icproxy-view
+subjects:
+- kind: ServiceAccount
+  name: icproxy
+roleRef:
+  kind: Role
+  name: view
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: icproxy-deployer
+  labels:
+    application: icproxy-deployer
+---
+apiVersion: v1
+kind: RoleBinding
+metadata:
+  labels:
+    application: icproxy-deployer
+  name: icproxy-edit
+subjects:
+- kind: ServiceAccount
+  name: icproxy-deployer
+roleRef:
+  kind: Role
+  name: edit
+---
+

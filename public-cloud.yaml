@@ -1,0 +1,297 @@
+##################################################################################################
+# Details service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: details
+  labels:
+    app: details
+    service: details
+  annotations:
+    proxy.grs.github.com/network: myrouter
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: details
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: details-v1
+  labels:
+    app: details
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: details
+        version: v1
+    spec:
+      containers:
+      - name: details
+        image: docker.io/maistra/examples-bookinfo-details-v1:0.12.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+##################################################################################################
+# Ratings service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: ratings
+  labels:
+    app: ratings
+    service: ratings
+  annotations:
+    proxy.grs.github.com/network: myrouter
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: ratings
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ratings-v1
+  labels:
+    app: ratings
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ratings
+        version: v1
+    spec:
+      containers:
+      - name: ratings
+        image: docker.io/maistra/examples-bookinfo-ratings-v1:0.12.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+apiVersion: v1
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZkRENDQTF3Q0ZFVlV2UW81SllSNUVDYWZsVTcyK2FOcFJmTGdNQTBHQ1NxR1NJYjNEUUVCQ3dVQU1HUXgKQ3pBSkJnTlZCQVlUQWxWVE1SRXdEd1lEVlFRSURBaE9aWGNnV1c5eWF6RVJNQThHQTFVRUJ3d0lRbkp2YjJ0cwplVzR4RmpBVUJnTlZCQW9NRFZSeWRYTjBJRTFsSUVsdVl5NHhGekFWQmdOVkJBTU1EbFJ5ZFhOMFpXUXVRMEV1ClkyOXRNQjRYRFRFNU1EZ3dNVEl3TWpZMU9Wb1hEVFEyTVRJeE5qSXdNalkxT1Zvd2dZZ3hDekFKQmdOVkJBWVQKQWxWVE1Rc3dDUVlEVlFRSURBSkRRVEVXTUJRR0ExVUVCd3dOVTJGdUlFWnlZVzVqYVhOamJ6RVZNQk1HQTFVRQpDZ3dNVW1Wa0lFaGhkQ0JKYm1NdU1UMHdPd1lEVlFRREREUnBiblJsY2kxeWIzVjBaWEl0WkdWdGJ6SXRZVzF4CkxtRndjSE11YzNWdGJXbDBMbk41YzJSbGMyVnVaeTFoZDNNdVkyOXRNSUlDSWpBTkJna3Foa2lHOXcwQkFRRUYKQUFPQ0FnOEFNSUlDQ2dLQ0FnRUF4eEFNYlRnUHdaeVR1S0plaGJtdXdJejQwMDhtb0t3V3dNYko5L3ZhUmJVNwpKMzZRdFI1VUUrYTU4dVVhaFlUa2VyU3JzUDhIaHZvcGVsMFdOeVZTS0xqNXN5M2RweXBsaEsyaDZMM01GTnMyCmp6NWRTR3R2WWJKaENwb0FNZkJxcUVmVm80N082MFNZRG41c0tyMGQ2Sm5xMDB2aUxueDh3WklvMVp6bnFCOU4KR1YwU0pPbzh1QXRzb21CdFVONWVtR2JvN3lrNWJHWkVhWUNnbGVRR2FqaDNPd3VDbnh3RE1Yc05PQnpjNXF3QgpPQVdvdjk0SVNrME9aQ0lySitZam5GamVud2NDQy93Wk9xQ1Z0N09JbWZzYlNNRUxIaFgzMnhtYkFSdENGZWdLClh6Mk9ab1ZGVWVzQlZGcFZmNkN2QStPTVFjVW5ZVUVrc0VVQlRwZ2hZM3I0TE5EMExNUnRpejVtVmpBT3ZJbSsKc2syckpubnZsN0xYaTROZzNMTk11M2NPQzlQeXMrQkJnaVROT0kxQUZIOGdsWGJzT3R2QlR4TlpLMVVUK2F4TgpVcllKYVAvVGJ3UnovUjVjcTJTeUVJSndLd255Z21yd2k3NXgrdjc5dmh3c3l6dVZBSVo0anJRckgzUHlwbGhZCmRKcHNobnJGamI1SG5TR0ZacmxoSTQraU13Qzd3NE83eVIxYUN6bldrV0F6dXpVTWhYbXFQa0Qxc3ZSQWx5Q2gKSXlRb2VRSzdCdnNYemY4eTNoUDhGQXlldWVveEJZN2xsM0lEYUU1T1ZzK3VmaHJWN3lnMUxhT3FmbGZ1U051ZQoyWUlmY3c3OWg4SzFZR1lnZmhBeVlMa3pJMlBqS3drQTZlMDRKbTgxVFQwQVJISlo3K1NEeU9tNmRyVnZXVEVDCkF3RUFBVEFOQmdrcWhraUc5dzBCQVFzRkFBT0NBZ0VBTm1VVkhaMmN3QkMrRUEyUmFoZEV3cU1PT2VBbGtnMjAKd0F6aTMrb3RtbFhuMlpCclBlMUhIWmZlSWc2elNCcW53RTdvaGpMQ2szUTBCdFgzVzZDb2hZWXZiZ0QyZ3kvbApBNFgrV3lnaElCTzhSUjNZcUdPemlXaVVTclp0OVR3ZStjSy9RWDFZd0gxZ2dpM1NSZU5PNWlma3FQU0c5Q2xuClI3NDdlUk8zRjc0dDVxakVCUWtBUFpTOEVtQmVvTDk5eTB2VnBsNmNUeFpTYmdJQnNpSmdMWmxJbzBFNUt4NnkKc0d6Qmh1R2RYb2JRNVpxZ04wVE1zQThPR1Bzc0JGekVocXRjL0VYSFNpQ05HaW9ldmxSMVAxbHI0VUJOcldUUgo1a0VRR01hMTFDL244TVlRVzRVT2duallvdlFhNWh2L0tiT01lMDFDanQwdEx6WTlla3IxaG4wZXQ4dkYzR0w4CmtIU1I4OUliTFJ6U0F5bFJkSjRUNEZHVnh1R0htR2kzalB0dXNESXJENlhvNkxiMWtJbmJYT3N5bGVNNlVpL2EKMTQrNmxsa0JIbzdSenJqSnV3ZjAxT3FuQXBYMDlWNTVwK1E3Y1BRdEZaMDV5TEljU3h2MmZLcjlHcm9najkxbQpoUElldk9MSEowTXpjek5UdVpGbURhaXJaRWZLWUc4NUxCeG1IWk5idHdSS2EralJFRkJDbjVrRzI5RGtRZ1YzCkgwSHptMDFkd0REWlZuTHlCL3p4UFdOQ0c5RXQzaDdiNVlucjJ3UG9DQ05Tc29hQjlRdEpkNXJ1WHFlaDk2cjEKNk5nNG5CeWFmREg2cjQwNFhibTNTTmtnd3p4c1M3SUhlVzRUaTQwdEdZMWJheUxRUnkyYk93a3dHOVpreGZKQgpEVlNUajhSYmJKUT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpQcm9jLVR5cGU6IDQsRU5DUllQVEVECkRFSy1JbmZvOiBBRVMtMjU2LUNCQywwMjc1RjlCN0I4QUM0NEQwRjAyN0MwQUU3REY2RTY0MQoKZHVadkJrNnhDQS9Fb2Y5N1F1d05aSUhsUk5tWDlEaVEzbVRpdlo3SUo2Ti9Dd0FCREswWnVsSngxUXZueFlTYgpuZnhweHhNa1doYUUrRnpQaXk2TjJ5bk9FWFREWndkR3NocXpSUEdlbjgrS2VWYVkxRmc4ODRSZWY2K1k0bTM1CkdIS3VrTmFNeXhOYS9qZThNODFxek9iVEVndzJKMzdwdTZwM0RtQkZaZjJWMUE4Uk9JT29FR0RYWXpTMEdoTXcKdnA0L3d3WWJPOVduSWtwQW5wMitNWWszOUVJenExODM0RldWNUk5WHhpN3RQc094OFh2TkkzUTdiUE9hQ1c0aQpoZGI3Y1NLZFVPWElvZ0NZaHhXY1NVRm5EYytrMXlQNUZaM2ZIQ2pnTkMwbzdyOXFuQW1OWmFvZ0Q2YjhrcmNOCmhHMi9SaGJKNTgwRWl6blhvbm5oRzhQbi93U0xzcFJKcTNiWnB3RVRnekcvY2RVNmNHakllMFVjaEhhbnNsc3MKM3JSNXdPaGNTd3NWMnlGMnU4TTV2U0tzSzNReXFLMWZ5dHJpdGtoaVMvenJRR2pGazhZa1pOWUlSQlo2c25ObApRWEE4VHpDSWJTMnJRaHZ5M2YzSms3eXJXanVoQnlPV2x2OXVhcU9wbCtBVDFxeG51eTJPcGFHNkFNUFBVQk5CCm16RHIyRTdtbFNxS0R5VXoxcVFEOUhmNENlV0ZrUjZDQnNMc25BV3Y1ZUNEdDJIeVBtM29WbXFjUnIvSGhqbVQKSzU1UHBEdUJ2YUpoMUVPL2FhYlRWR2F0M1NHdzVVYkNqYW9XSXJNTzNHZ084ODVWSGtPRC9td2E3Y3E5V1RuUApCOFZTZVI3eGMvNUxZREpYbG8wTnVkS1pZb1lSNXE3OG5RS05pSVJRdlVKMlNKaXcwYTdrZ3dPbzRoelFocFlnClpuUmtubmppS1FTemQwWVliMG85YytJZFFnaGxPK0Rpam5LTndJSENJNklGMlZBcUpmbXAzYXZqQUdZM2RGZGYKYjh2aVJqa1VTeE9pMlBiQVN5Z2NiK0F1YVpFem5NemdqMXlCUWs2VTlaL2tQV3dlWml3b05HdkpKa3hsZ2YvaApaa0tLRzV6VGhwc2tkbWxtZUxDM1dxRXJDRjc3ZEYyMUJNN0VpK2ltTWhtZ1A0SEJEODYzNEhHT0Q3MEpWa1V6ClZYc3hmZGZsaFZUSml3b0h4ZmNxQlFWVHNMWGtjcmVNQmorTkZjYktWM2RTODNTd3RzUDc5SjlEMzk0R0k0MUsKeUljNDRNcXVBM2UzNmV6WTFWRDJ6cUFrNVlLdGt0VHhiU1owT2FpbFAyRE4wQ0JsOUhLNjZXUXVFTmdDWGJwYgpvSFJqNXNkSGlibHBJaFU5SHBYWFd0dWZCTzRTY0krT0VobzJ5QVZFQmIxaExwY2MraUtiQml5Yi9SZU1QTndvCmxLRkh1NWh0MzZJaDVqUGMxM0tOWGtweEZkRHdINERsam1uZlBUdkVGOUdLU0hDQ29LVnlRYk50SHU3L1FPSFoKREo1RHhDZDVxby91ZGh3TnBZVkxrRVNqN0dVYVVLZGoweTU4MW8zZWYzSWUvUDJPYW81dHVBdkpIdVV1cGJIOQpwNzhBWmZWdFdTbmlGYnRMVkRndW96WWRzbTArbGZjcTBVdkI1d0FIL0RuaTBlZ0MyRFp4cE1HcFFndjZwaE9jCm5VQWZ4OVB1MTNyZWg5Q1hYOXE3emk2RU1WTWZEQWNidzE2UTJKdFJKNnBqYThYdHVKVlVDZ3F2ZXFiNmtuQWoKdWNzYVY4dkpkYkF5UkVWc1l4OXFTeFkySXpMZTlGVlhJY284RHhlQmlvSE5OTVZnc3VoWFR0ZDE5LzIzWWRMMQpyZXZudUNxMENlREVpand5aUYzRC9CcVdGdFVpWGFaNGtxRTN2UURtSG5lZGRHZlRNWG0xMHBxNEZBcUU0ZU5MCis1NDF5SkU1Q2t0MWhqOStvaFd1SDFXTDB5MlVTdk1DVnc0R0x6SU5OZ2dCVXYyTDR4SGRjdmNQalI2a0ZNNm4KUmZ1TzdYTmJHVGFSSmRBcE05SjgyVEZ1OTNJWFltT3lUY0JEQlA5Z0dTUFEyQmJsdVQxcW9Hd3dOQitKY1FoMwp0MGVRb3Y5UW9Ud3BQNVlLZEVXa0U0VVQwYUI5VFlpb3h5ZmlUNXM3cXF6L2FHZGdYT2JVK3NwUDliWk8wcFZECmVWZjhBbGhMS3FvSmJpU1I4cEZzN2IyUlVBZmdRdHhuQmN2cFhMUzFPQUlvZUF2Y2Z1ZXJzVDVRbWhTOUpKbzcKV05scnZDN1o1Z011MCtkV0wxL1RGV3VjY1ZxZkNRdkswdDhyZFNoVDl6ZmVyZkx5dDNUdFlCNFpGZ2dSVXRScApsSWpBTXRwUGZqWEU1c01lWWdTaGp2ckZ1UU9uOUFCVmdLQ2RtcG4zOTBXbENLcmZKcWxaUG5NWTdtSll6UFlqClA4VmNZM3NQTDUrVmVaTm1QbTR6QXFCT09INkRuazd4ckZwdTRqa1JreElJZUZFRjlzZDc5UUltZDdrMjhYWFYKejdYcGRzU0crdEJyeGpJbFIycnk2emxGMFBHQk1yVUhWOVUyUXh2aFJHdFlNaUV5TW9WQW9tT3RveEp3K0RmLwo0WnBhaFJQdldoZ3FGMysvVC9BS2dSYWIyWEM0dTNUb255NXVNQVZxbkhaSWpKbmdvUWhWOUVVb1FqZmZFVnZqCmNRNFBiSEpaZTZUL3FLNVVIMEJ2UkFLWk5naGNZVHpZTllXTlc1K244OTJpU0QzaGo4YTFKUjkybVlnM1ViSTkKZUFhUGJFMVE4ekpscXlyT3ZRcm96Z3hUR0RpMHFPUjlzc2NmUDlmbW45S0xjbHFQVll4QmJvQ2tlWk9ENnk2WApNeGFzc2NIVkxsWUdKN3QzelpZcVZYY292ZjRIakdPbEZrVFNtMjBZM3h1c0c0VjQ1ZVUvcTgyVklDVXNpdXhhCnNwdW9WUnBNNjJuWS9hMmNENXpGT0hPclRycUxYVWtYc0NmQW5tSDJqS1gwQVo5YlM1ZnZwQlRmVXNSWDJZWk4KcUVXTnFyNjF2R1VXTWkrMmJhK2RCa2o1Z05TNU9EcWpNNVpBeVlJcFFFU2plaWhqQXlaUVprRDAvWmV4Y0d3awpVVkVVYlpzZWw5UVpqMlVpSFJxRGxpUndQWm0zb0dOa0U5dW03dnFzdXVMNXF0SERVNmE4Q1NZLzhjcXJhTk56CnFCRnYwV3dxQlZpY1hVNlZtdXFQM1BxVnhPS0lSenNEeEx3WDRqWlc1NUhMVlJid1VKdlNLNjJvTjYxWkJHWXoKMGluVWFaU29LMjFONFFGd1BXbGMzUERXMHRablpkODNnbW8wL3lRMmFrSXErTVlzMXg0THlwY0lZU0ZrMmIrcAoxa1NrbUs3c3h2bEhNTDM3Z0xFYklGZUx5SXcvSWlaV29KenJkWFdPTTJTZ3VMbjhQdjVmUDdjUkpiMTZHY1ZOCkc0VDl1bWV5VERHVXI5TXMyZ1dwZ3NKT0J5dGJHb2NxY3R5NTAxd0ZwZGJSenQ2a0xKMThsU1hEVXRISmVHNjcKRVlXeEprd2hNYk1LVEV5RS9zR2g5RDNsSWd0WTlFUFU4WTZzWnZuUmp0YXQ5SXkvZHQzZ2R5MXprNXI1Vng0Uwo4dlRUdG9rYUU3ckhPTzRUcmtESG84YndiczYydVRvWHZmMHJWRVNmYmtySlBmaThYREJPcVdnU1IyTm1HSW1ZCmN3eEdVSkQ1T3JLczZUSTdDNGk4aUFiMHdURWRHWjcrTVpndmlsUjRiOGlFdWtqSmp3aWlnZlF5T2pzMDRLMzgKQ1JTNGhQWW9ZYzh0NGVLQzdua3ZkTlJPbW44WEFzcXFaaGFDZWMrTlhiclBmM0tvbFAyWDZ1clRaVkVKYnQ4aAoyZXlVL1JENDNhU2FUakJZeEl2MXJZV1lqalAvdXRSZ1p0ZnFaMmZySFN3MkxXRUxIWm1wWkUvYkcyK1hTQ0xxCjY1T1B4OVJVSXl0UlQ1TFROSXM2Qm9LZ1hieGpLZzFlL0NzS1BYYVA2Wnd4R1VNb3RoaURJOVFXVGNxbnFMdWMKNzRrcGEwVmxZTnd1c1g4MVFhWTdCOGMyWndyV1o2L3JpWWxQSkljdE9NNWtySGV2dFRTa0c0UVJCWnN0RWN2eAotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+  tls.pw: YXdzLXBhc3N3b3JkCg==
+  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZxekNDQTVPZ0F3SUJBZ0lVQzk0SkQrS0FCenpaQ0JWOEkzYVozVGVhSW1Rd0RRWUpLb1pJaHZjTkFRRUwKQlFBd1pERUxNQWtHQTFVRUJoTUNWVk14RVRBUEJnTlZCQWdNQ0U1bGR5QlpiM0pyTVJFd0R3WURWUVFIREFoQwpjbTl2YTJ4NWJqRVdNQlFHQTFVRUNnd05WSEoxYzNRZ1RXVWdTVzVqTGpFWE1CVUdBMVVFQXd3T1ZISjFjM1JsClpDNURRUzVqYjIwd0lCY05NVGt3T0RBeE1qQXlOalU1V2hnUE1qSTVNekExTVRVeU1ESTJOVGxhTUdReEN6QUoKQmdOVkJBWVRBbFZUTVJFd0R3WURWUVFJREFoT1pYY2dXVzl5YXpFUk1BOEdBMVVFQnd3SVFuSnZiMnRzZVc0eApGakFVQmdOVkJBb01EVlJ5ZFhOMElFMWxJRWx1WXk0eEZ6QVZCZ05WQkFNTURsUnlkWE4wWldRdVEwRXVZMjl0Ck1JSUNJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBZzhBTUlJQ0NnS0NBZ0VBc1lSdVd4MEpqdE9zTmZ1My96VUoKV1ZvY3lWaU9zQ1gvbVgrbXB0dVFUQWJaSjJWbkk4Q0xvczlucThXcHNyWVdMV2c2TDZCd3VHT0c0d21ycHRSdgoxT2xNWDdOUjhJUUdHZDFaekd0S3laNUM0b08zTGcwK0VyZlc3NHc4SDA2RWNEb3NEcUdqQ1JSbzlxMnUzVS9ICnJGRWYyVmZrK3dpTWhSZ21ON2dubE02cm42SEUzSCt2WkdQOEVNS2k3RWlYS3k5Y1YxR2RMT0FEWXk0d0M0Z0wKRDNTM1I2TUMzTnB5Q0VOS1FLODVYc1pPNWlENXU3Qy80cHVvOENtVnBHRXNMZDN4ZnVVY1huYUJBSGlEZllwbApOSnV2ZmtPbmpSZXZFVC9PUzRkdk5QdUcwU0tXNUkwaXZQL1dCK044ajJ1Qm9CSzFXQy8zR1plMHkxd0Z0NUlFCmp6SjZtd0JaUExIaUxsdDMwcUFiVUZVWmlVVlI4R1djcjN1ZU5FY1RhMHhJZkN4M2hwKzZLWTJEWjNTMWRZS1gKVFMzaE1GcUVZaUxsbjNMbS85a2FGUW5jSXlIUVR3ODZzWFBhVGlGdVAwMStWQjc2WW92WWs3OWFGU29XdjlSNwpCMzM5bXl4NXEyeGxudWFvOElyUloxZW13YW9FTEZVOTV6WDBMdVJQaWhvNTZjR2k2Z3RvQTh5OUU3SHo0TjBKCjcyU3o3QkNYMUFZN2VKbm1lUDZYSmpXYktSdDQwWS9jc0h5SzNqSllXNE00dHcwKzlZNEZzUGN2MnFtSTRRQkMKTDFmWlh2RkpOWWc2V2J2ajM4anpiVFJCNVVLZDNsV2svUkRjaEFPMnB4V1pKcUdZSVlMbjNIV2FuSUFiaTl1cApDMGtpOFhhNEs4NkdFRUpUdVc0QmxVc0NBd0VBQWFOVE1GRXdIUVlEVlIwT0JCWUVGQTRZMXZLMUlqSlBmYUdSCmlvSWtsM1MrWXJSNk1COEdBMVVkSXdRWU1CYUFGQTRZMXZLMUlqSlBmYUdSaW9Ja2wzUytZclI2TUE4R0ExVWQKRXdFQi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dJQkFJeG1DUjJlelBGUjY4VmpIQkpsQXpYTApNeHg4cjBpeDY3TitWM3h3dER6TW1sZmtHdU9jamw4V3IybzR1NkxQM0Nvb0kzNGFVaGtYTjd0M2hkUlJZOHJxCno4dFdORW5hZXR1b2ZrRWlNMTFhRjBOa1dPd3VQU1ZnOGNlbDVtWXFLZ3lXWnlteUY3NE9nbEhOQmxyMXhxdkEKNUJPckhUY0xCMXJaSjdqVHV3bTRoNXUyUkpsZlhnaDRVZlF1QXMrRGYzNG9adXo0Rnczckd2T0hhTk4wSitUYgpYQy9YUkZocFdnZG5KQWd1ZjBvcDlrL3hpTVZlM0dVWThTRTFXMk1WS1VyMUZYQXFwdCtsS2dXYWZvUUsyK3h0ClpCZjNXS2pEYURBMmFlVXErOFQwWWQvTFhJeU8zSkdJczR3N1YyQk9VMWZQY0daMitodjZpdEk2bi8rYStlYmsKNmdWTHdlWWhWVjRrYUl2dk5kQS94bGZLUmhTcGw0N1lIM2FqNnhnQlVTOXVCZEx5NzNsNXFqMHlOUEdGeFJ4ZQo1Wjh3c0V4TTdVNXJiczRFWkRIaitPTjB0Sjd5OXAzRGFSdUMxWjIxczQ5RE1ENy9RckZCQUNEamZoYWp0T051ClUzUCtxTHFTUmVDU2NRem9aSUNrU29FczZXc2QvWE42QnlnWUZJYjQvUEQwY0krbnY4bERldnVuRVZldTRGZUUKRTMybGZoZDV2bDBZNjVhdjNSQVFmTUFjd1N4YTlLbVFyVGlWMTN0MGYwSUQrV0hUTXFMbHVKWU9UaEpacHNUeApSZzRBVUpINUNSNUJwWGI1Y2FpbWhTNG80aG5pOTRRYm5GSHRHMTc2aTYzOHhMaU9CUUV4K2NyWGxwSFAxK2xHCit3RDB6UXdxeDFud2FGQ0lVRnNPCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+kind: Secret
+metadata:
+  name: qdr-internal-cert
+type: kubernetes.io/tls
+---
+apiVersion: v1
+data:
+  qdrouterd.conf: |
+    router {
+       id:AWS
+       mode: interior
+    }
+
+    sslProfile {
+       name:ssl-profile
+       certFile: /etc/qpid-dispatch-certs/internal/tls.crt
+       keyFile:/etc/qpid-dispatch-certs/internal/tls.key
+       passwordFile: /etc/qpid-dispatch-certs/internal/tls.pw
+       caCertFile: /etc/qpid-dispatch-certs/internal/ca.crt
+    }
+
+    listener {
+       role: normal
+       host: 0.0.0.0
+       port: amqp
+       saslMechanisms: ANONYMOUS
+       authenticatePeer:no
+    }
+
+    listener {
+       role: normal
+       host: 0.0.0.0
+       port: 8672
+       saslMechanisms: ANONYMOUS
+       authenticatePeer:no
+       http: yes
+    }
+
+    listener {
+       sslProfile: ssl-profile
+       role: inter-router
+       host: 0.0.0.0
+       port: 55672
+       saslMechanisms: EXTERNAL
+       authenticatePeer:yes
+    }
+
+    address {
+       prefix: closest
+       distribution: closest
+    } 
+
+    address {
+       prefix: multicast
+       distribution: multicast
+    }
+
+kind: ConfigMap
+metadata:
+  name: qdr-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myrouter
+  labels:
+    app: qdrouterd
+spec:
+  ports:
+  - port: 5671
+    name: amqps
+  - port: 5672
+    name: amqp
+  - port: 8672
+    name: console
+  - port: 55672
+    name: inter-router
+
+  selector:
+    type: qdrouterd
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: qdrouterd
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: qdrouterd
+        version: v1
+        type: qdrouterd
+    spec:
+      containers:
+      - name: qdrouterd
+        image: quay.io/interconnectedcloud/qdrouterd:1.8.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5672
+          protocol: TCP
+        volumeMounts:
+        - name: qdr-config
+          mountPath: /etc/qpid-dispatch
+        - name: internal-certs
+          readOnly: true
+          mountPath: /etc/qpid-dispatch-certs/internal
+      volumes:
+      - name: qdr-config
+        configMap:
+          name: qdr-config
+      - name: internal-certs
+        secret:
+          secretName: qdr-internal-cert
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: amqps
+spec:
+  host: inter-router.${NAMESPACE}.apps.${OPENSHIFT_CLUSTER_NAME}
+  port:
+    targetPort: inter-router
+  tls:
+    termination: passthrough
+  to:
+    kind: Service
+    name: myrouter
+    weight: 100
+  wildcardPolicy: None
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: myrouter
+  labels:
+    application: myrouter
+type: Opaque
+stringData:
+  connect.json: |-
+    {
+        "scheme": "amqp",
+        "host": "myrouter"
+    }
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: icproxy-deployer
+  labels:
+    application: icproxy-deployer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: icproxy-deployer
+  template:
+    metadata:
+      labels:
+        application: icproxy-deployer
+    spec:
+      serviceAccountName: icproxy-deployer
+      containers:
+      - name: deployer
+        image: quay.io/gordons/icproxy-deployer
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: icproxy
+  labels:
+    application: icproxy-deployer
+---
+apiVersion: v1
+kind: RoleBinding
+metadata:
+  labels:
+    application: icproxy-deployer
+  name: icproxy-view
+subjects:
+- kind: ServiceAccount
+  name: icproxy
+roleRef:
+  kind: Role
+  name: view
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: icproxy-deployer
+  labels:
+    application: icproxy-deployer
+---
+apiVersion: v1
+kind: RoleBinding
+metadata:
+  labels:
+    application: icproxy-deployer
+  name: icproxy-edit
+subjects:
+- kind: ServiceAccount
+  name: icproxy-deployer
+roleRef:
+  kind: Role
+  name: edit
+---
+
