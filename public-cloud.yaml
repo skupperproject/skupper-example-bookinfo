@@ -1,42 +1,38 @@
 ##################################################################################################
-# Details service
+# Productpage services
 ##################################################################################################
 apiVersion: v1
 kind: Service
 metadata:
-  name: details
+  name: productpage
   labels:
-    app: details
-    service: details
-  annotations:
-    proxy.grs.github.com/network: ${SKUPPER_PUBLIC_ROUTER_NETWORK_NAME}
+    app: productpage
+    service: productpage
 spec:
   ports:
   - port: 9080
     name: http
   selector:
-    app: details
+    app: productpage
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: details-v1
+  name: productpage-v1
   labels:
-    app: details
+    app: productpage
     version: v1
 spec:
   replicas: 1
   template:
     metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
       labels:
-        app: details
+        app: productpage
         version: v1
     spec:
       containers:
-      - name: details
-        image: docker.io/maistra/examples-bookinfo-details-v1:0.12.0
+      - name: productpage
+        image: docker.io/maistra/examples-bookinfo-productpage-v1:0.12.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
@@ -51,8 +47,6 @@ metadata:
   labels:
     app: ratings
     service: ratings
-  annotations:
-    proxy.grs.github.com/network: ${SKUPPER_PUBLIC_ROUTER_NETWORK_NAME}
 spec:
   ports:
   - port: 9080
@@ -82,79 +76,3 @@ spec:
         ports:
         - containerPort: 9080
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ${SKUPPER_PUBLIC_ROUTER_NETWORK_NAME}
-  labels:
-    application: ${SKUPPER_PUBLIC_ROUTER_NETWORK_NAME}
-type: Opaque
-stringData:
-  connect.json: |-
-    {
-        "scheme": "amqp",
-        "host": "${SKUPPER_PUBLIC_ROUTER_NETWORK_NAME}"
-    }
----
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: icproxy-deployer
-  labels:
-    application: icproxy-deployer
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      application: icproxy-deployer
-  template:
-    metadata:
-      labels:
-        application: icproxy-deployer
-    spec:
-      serviceAccountName: icproxy-deployer
-      containers:
-      - name: deployer
-        image: quay.io/gordons/icproxy-deployer
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: icproxy
-  labels:
-    application: icproxy-deployer
----
-apiVersion: v1
-kind: RoleBinding
-metadata:
-  labels:
-    application: icproxy-deployer
-  name: icproxy-view
-subjects:
-- kind: ServiceAccount
-  name: icproxy
-roleRef:
-  kind: Role
-  name: view
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: icproxy-deployer
-  labels:
-    application: icproxy-deployer
----
-apiVersion: v1
-kind: RoleBinding
-metadata:
-  labels:
-    application: icproxy-deployer
-  name: icproxy-edit
-subjects:
-- kind: ServiceAccount
-  name: icproxy-deployer
-roleRef:
-  kind: Role
-  name: edit
----
-

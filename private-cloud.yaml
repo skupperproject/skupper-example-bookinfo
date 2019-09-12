@@ -1,58 +1,43 @@
 ##################################################################################################
-# Productpage services
+# Details service
 ##################################################################################################
 apiVersion: v1
 kind: Service
 metadata:
-  name: productpage
+  name: details
   labels:
-    app: productpage
-    service: productpage
+    app: details
+    service: details
 spec:
   ports:
   - port: 9080
     name: http
   selector:
-    app: productpage
+    app: details
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: productpage-v1
+  name: details-v1
   labels:
-    app: productpage
+    app: details
     version: v1
 spec:
   replicas: 1
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
       labels:
-        app: productpage
+        app: details
         version: v1
     spec:
       containers:
-      - name: productpage
-        image: docker.io/maistra/examples-bookinfo-productpage-v1:0.12.0
+      - name: details
+        image: docker.io/maistra/examples-bookinfo-details-v1:0.12.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  labels:
-    app: productpage
-  name: productpage
-  selfLink: /apis/route.openshift.io/v1/namespaces/hello/routes/console
-spec:
-  host: productpage-${SKUPPER_PRIVATE_PROJECT_NAMESPACE}.${SKUPPER_PRIVATE_CLUSTER_IP}.nip.io
-  port:
-    targetPort: http
-  to:
-    kind: Service
-    name: productpage
-    weight: 100
-  wildcardPolicy: None
 ---
 ##################################################################################################
 # Reviews service
@@ -64,58 +49,12 @@ metadata:
   labels:
     app: reviews
     service: reviews
-  annotations:
-    proxy.grs.github.com/network: ${SKUPPER_PRIVATE_ROUTER_NETWORK_NAME}
 spec:
   ports:
   - port: 9080
     name: http
   selector:
     app: reviews
----
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: reviews-v1
-  labels:
-    app: reviews
-    version: v1
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: reviews
-        version: v1
-    spec:
-      containers:
-      - name: reviews
-        image: docker.io/maistra/examples-bookinfo-reviews-v1:0.12.0
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9080
----
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: reviews-v2
-  labels:
-    app: reviews
-    version: v2
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: reviews
-        version: v2
-    spec:
-      containers:
-      - name: reviews
-        image: docker.io/maistra/examples-bookinfo-reviews-v2:0.12.0
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9080
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -139,117 +78,3 @@ spec:
         ports:
         - containerPort: 9080
 ---
-##################################################################################################
-# Ratings service
-##################################################################################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: ratings
-  labels:
-    app: ratings
-    service: ratings
-  annotations:
-    proxy.grs.github.com/network: ${SKUPPER_PRIVATE_ROUTER_NETWORK_NAME}
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: ratings
----
-##################################################################################################
-# Details service
-##################################################################################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: details
-  labels:
-    app: details
-    service: details
-  annotations:
-    proxy.grs.github.com/network: ${SKUPPER_PRIVATE_ROUTER_NETWORK_NAME}
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: details
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ${SKUPPER_PRIVATE_ROUTER_NETWORK_NAME}
-  labels:
-    application: ${SKUPPER_PRIVATE_ROUTER_NETWORK_NAME}
-type: Opaque
-stringData:
-  connect.json: |-
-    {
-        "scheme": "amqp",
-        "host": "${SKUPPER_PRIVATE_ROUTER_NETWORK_NAME}"
-    }
----
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: icproxy-deployer
-  labels:
-    application: icproxy-deployer
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      application: icproxy-deployer
-  template:
-    metadata:
-      labels:
-        application: icproxy-deployer
-    spec:
-      serviceAccountName: icproxy-deployer
-      containers:
-      - name: deployer
-        image: quay.io/gordons/icproxy-deployer
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: icproxy
-  labels:
-    application: icproxy-deployer
----
-apiVersion: v1
-kind: RoleBinding
-metadata:
-  labels:
-    application: icproxy-deployer
-  name: icproxy-view
-subjects:
-- kind: ServiceAccount
-  name: icproxy
-roleRef:
-  kind: Role
-  name: view
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: icproxy-deployer
-  labels:
-    application: icproxy-deployer
----
-apiVersion: v1
-kind: RoleBinding
-metadata:
-  labels:
-    application: icproxy-deployer
-  name: icproxy-edit
-subjects:
-- kind: ServiceAccount
-  name: icproxy-deployer
-roleRef:
-  kind: Role
-  name: edit
----
-
