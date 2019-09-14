@@ -59,7 +59,7 @@ To complete this tutorial, do the following:
 * [Prerequisites](#prerequisites)
 * [Step 1: Install demo source files and Skupper tool](#step-1-install-demo-source-files-and-skupper-tool)
 * [Step 2. Set up target namespaces](#step-2-set-up-target-namespaces)
-* [Step 3: Install Skupper resources](#step-3-install-target-resources)
+* [Step 3: Install Skupper resources](#step-3-install-skupper-resources)
 * [Step 4: Connect your namespaces](#step-4-connect-your-namespaces)
 * [Step 5: Deploy Bookinfo application](#step-5-deploy-bookinfo-application)
 * [Step 6: Expose your internal services via Skupper](#step-6-expose-your-internal-services-via-skupper)
