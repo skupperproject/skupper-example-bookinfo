@@ -42,7 +42,7 @@ deploy the _productpage_ and _ratings_ services on a remote, public cluster.
     <------ Http request
 
 User access to the application is via an ingress route to the _productpage_ service.
-The reamining services are not publicly accessible but are available to
+The remaining services are not publicly accessible but are available to
 the _productpage_ and to each other through the Skupper network.
 
 In the Bookinfo application the _productpage_ service sends requests to the
@@ -58,13 +58,13 @@ To complete this tutorial, do the following:
 
 * [Prerequisites](#prerequisites)
 * [Step 1: Install demo source files and Skupper tool](#step-1-install-demo-source-files-and-skupper-tool)
-* [Step 2. Set up the target namespaces](#step-2-prepare-openshift-clusters)
-* [Step 3: Install Skupper resources](#step-3-deploy-skupper-network)
-* [Step 4: Connect your namespaces](#step-4-deploy-bookinfo-application)
-* [Step 5: Deploy Bookinfo application](#step-5-add-annotations-to-link-microservices-to-skupper-network)
-* [Step 6: Expose your internal services via Skupper](#step-6-expose-productpage-service)
-* [Step 7: Expose main Bookinfo productpage application](#step-7-open-bookinfo-app)
-* [Step 8: Open Bookinfo app](#step-7-open-bookinfo-app)
+* [Step 2. Set up target namespaces](#step-2-set-up-target-namespaces)
+* [Step 3: Install Skupper resources](#step-3-install-target-resources)
+* [Step 4: Connect your namespaces](#step-4-connect-your-namespaces)
+* [Step 5: Deploy Bookinfo application](#step-5-deploy-bookinfo-application)
+* [Step 6: Expose your internal services via Skupper](#step-6-expose-your-internal-services-via-skupper)
+* [Step 7: Expose main Bookinfo productpage application](#step-7-expose-main-bookinfo-productpage-application)
+* [Step 8: Open Bookinfo application](#step-8-open-bookinfo-application)
 * [Next steps](#next-steps)
 
 
@@ -86,7 +86,7 @@ then simply create two projects with different namespaces on that cluster
 and proceed with the demo.
 Skupper will route service requests between namespaces on a single cluster just as well.
 
-## Step 1: Install the demo source files and Skupper tool
+## Step 1: Install demo source files and Skupper tool
 
 1. On your local machine, make a directory for this tutorial, clone the example repo, 
 and install the Skupper command line executable:
@@ -107,7 +107,7 @@ To test your installation, check the Skupper version
     $ skupper --version
     skupper version <version>
 
-## Step 2. Set up the target namespaces
+## Step 2. Set up target namespaces
 
 1. Console session for *PUB*
 
@@ -344,7 +344,7 @@ it cannot be routed across the Skupper network.
 
 Now the Bookinfo app is fully functional.
 
-## Step 8: Open Bookinfo app
+## Step 8: Open Bookinfo application
 
 The Bookinfo app is available at a web address that can be discovered from 
 the terminal for the PUB cluster: 
