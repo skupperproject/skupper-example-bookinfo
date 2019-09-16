@@ -22,7 +22,7 @@ the Bookinfo application _details_ and _reviews_ services in a local, on-premise
 
 ### Bookinfo Skupper Deployment
 
-![Bookinfo Skupper deployment](https://github.com/ChugR/skupper-example-bookinfo/blob/cr6/graphics/skupper-example-bookinfo-deployment.gif)
+![Bookinfo Skupper deployment](https://github.com/ChugR/skupper-example-bookinfo/blob/master/graphics/skupper-example-bookinfo-deployment.gif)
 
 User access to the application is via an ingress route to the _productpage_ service.
 The remaining services are not publicly accessible but are available to
