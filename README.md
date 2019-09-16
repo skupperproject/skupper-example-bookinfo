@@ -10,36 +10,19 @@ behaves as if all the services are running in the same cluster namespace.
 This example further illustrates how
 services running in a private cluster are made available to services in a
 public cluster, even when the private cluster has no ingress routes and
-will accept no incoming network connections. 
+will not accept incoming network connections. 
 The Skupper infrastructure securely provides this connectivity
 with no special user permissions, firewall rules, VPNs, or system administrator
 actions.
 
-In this tutorial you will deploy the Bookinfo application _details_ and _reviews_ services 
-in a local, on-premises cluster and
-deploy the _productpage_ and _ratings_ services on a remote, public cluster.
+In this tutorial you will deploy 
+deploy the _productpage_ and _ratings_ services on a remote, public cluster
+and
+the Bookinfo application _details_ and _reviews_ services in a local, on-premises cluster.
 
-    #####################         #####################
-    # local cluster PVT #         # public cloud PUB  #
-    #                   #         #                   #
-    # +--------------+  #         #  +-------------+  #
-    # | skupper      |<=============>| skupper     |  #
-    # +--------------+  #         #  +-------------+  #
-    #                   #         #                   #
-    # +--------------+  #         #  +-------------+  #  route
-    # | details      |<--------------| productpage |<=========
-    # |              |  #    +-------|             |  #
-    # +--------------+  #    |    #  +-------------+  # 
-    #                   #    |    #                   #
-    # +--------------+  #    |    #  +-------------+  #
-    # | reviews      |<------+    #  | ratings     |  #
-    # |              |-------------->|             |  #
-    # +--------------+  #         #  +-------------+  #
-    #                   #         #                   #
-    #####################         #####################
-    
-    <====== Network connection
-    <------ Http request
+### Bookinfo Skupper Deployment
+
+![Bookinfo Skupper deployment](https://github.com/ChugR/skupper-example-bookinfo/blob/cr6/graphics/skupper-example-bookinfo-deployment.gif)
 
 User access to the application is via an ingress route to the _productpage_ service.
 The remaining services are not publicly accessible but are available to
