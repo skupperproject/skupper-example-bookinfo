@@ -33,9 +33,22 @@ to the _ratings_ service. Skupper manages routing the requests between
 the services regardless of the cloud instance or namespace in which the services
 are running.
 
+### Bookinfo Skupper Deployment Details
+
+![Bookinfo Skupper deployment details](https://github.com/skupperproject/skupper-example-bookinfo/blob/master/graphics/skupper-example-bookinfo-detailsgif)
+
+This illustration shows how Skupper manages to get service requests across the
+Skupper network. Each service that is exposed to the Skupper network is propagated
+to all connected Skupper namespaces. Skupper proxy service endpoints run in each namespace
+to be a source or sink for traffic to or from the named service.
+
+### Credits
+
 This demo uses public Bookinfo images provided by _docker.io/maistra_. The _maistra_ images
 constrain filesystem access to common directories and provide a
 successful demo on a wider variety of Kubernetes platforms.
+
+## Run the Bookinfo tutorial
 
 To complete this tutorial, do the following:
 
