@@ -35,7 +35,7 @@ are running.
 
 ### Bookinfo Skupper Deployment Details
 
-![Bookinfo Skupper deployment details](https://github.com/skupperproject/skupper-example-bookinfo/blob/master/graphics/skupper-example-bookinfo-detailsgif)
+![Bookinfo Skupper deployment details](https://github.com/skupperproject/skupper-example-bookinfo/blob/master/graphics/skupper-example-bookinfo-details.gif)
 
 This illustration shows how Skupper manages to get service requests across the
 Skupper network. Each service that is exposed to the Skupper network is propagated
