@@ -38,9 +38,19 @@ are running.
 ![Bookinfo Skupper deployment details](https://github.com/skupperproject/skupper-example-bookinfo/blob/master/graphics/skupper-example-bookinfo-details.gif)
 
 This illustration shows how Skupper manages to get service requests across the
-Skupper network. Each service that is exposed to the Skupper network is propagated
-to all connected Skupper namespaces. Skupper proxy service endpoints run in each namespace
-to be a source or sink for traffic to or from the named service.
+Skupper network. Skupper is a distributed system with installations running
+in one or more namespaces. As Skupper installations are connected they share
+information about exposed services. All Skupper installations learn about all
+services exposed on every installation. Skupper then runs proxy service endpoints
+in each namespace to properly route requests to or from every exposed service.
+
+In this example
+the _details_ and _reviews_ proxies in the Public namespace intercept requests for their 
+services and forward them to the Skupper
+network. The _details_ and _reviews_ proxies in the Private namespace receive requests from the
+Skupper network and send them to the related service. 
+The other proxy, _ratings_, does the same thing only in
+the opposite direction: requests are forwarded from the Private to the Public namespaces.
 
 ### Credits
 
