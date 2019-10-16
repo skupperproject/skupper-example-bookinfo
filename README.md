@@ -23,8 +23,6 @@ the _details_ and _reviews_ services in a local, on-premises cluster in namespac
 
 ### Bookinfo Skupper Deployment
 
-![Bookinfo Skupper deployment]
-
 <img src="graphics/skupper-example-bookinfo-deployment.gif" width="640"/>
 
 User access to the application is via an ingress route to the _productpage_ service.
@@ -38,8 +36,6 @@ the services regardless of the cloud instance or namespace in which the services
 are running.
 
 ### Bookinfo Skupper Deployment Details
-
-![Bookinfo Skupper deployment details]
 
 <img src="graphics/skupper-example-bookinfo-details.gif" width="640"/>
 
