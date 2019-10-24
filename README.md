@@ -70,10 +70,11 @@ To complete this tutorial, do the following:
 * [Step 1: Set up your namespaces](#step-1-set-up-your-namespaces)
 * [Step 2: Install demo source files](#step-2-install-demo-source-files)
 * [Step 3: Deploy Bookinfo application](#step-3-deploy-bookinfo-application)
-* [Step 4: Connect your namespaces](#step-4-connect-your-namespaces)
-* [Step 5: Expose your internal services via Skupper](#step-5-expose-your-internal-services-via-skupper)
-* [Step 6: Expose main Bookinfo productpage application](#step-6-expose-main-bookinfo-productpage-application)
-* [Step 7: Open Bookinfo application](#step-7-open-bookinfo-application)
+* [Step 4: Expose productpage service](#step-4-expose-productpage-service)
+* [Step 5: Install Skupper](#step-5-install-skupper)
+* [Step 6: Connect your Skupper installations](#step-6-connect-your-skupper-installations)
+* [Step 7: Virtualize your internal services via Skupper](#step-7-virtualize-your-internal-services-via-skupper)
+* [Step 8: Open Bookinfo application](#step-8-open-bookinfo-application)
 * [Next steps](#next-steps)
 
 
@@ -95,7 +96,6 @@ Console for namespace `bookinfo-pvt`:
     <login-command-for-your-provider>
     kubectl create namespace bookinfo-pvt
     kubectl config set-context --current --namespace bookinfo-pvt
-    skupper init
 
 Console for namespace `bookinfo-pub`:
 
@@ -103,19 +103,9 @@ Console for namespace `bookinfo-pub`:
     <login-command-for-your-provider>
     kubectl create namespace bookinfo-pub
     kubectl config set-context --current --namespace bookinfo-pub
-    skupper init
 
 See [Getting started with Skupper](https://skupper.io/start/) for more
 information about setting up namespaces.
-
-Use `skupper status` in each console to check that Skupper is
-installed.
-
-    $ skupper status
-    Namespace '<ns>' is ready.  It is connected to 0 other namespaces.
-
-As you move through the steps that follow, you can use `skupper
-status` at any time to check your progress.
 
 ## Step 2: Install demo source files
 
@@ -148,10 +138,40 @@ Console for namespace `bookinfo-pvt`:
     service/reviews created
     deployment.extensions/reviews-v3 created
 
-## Step 4: Connect your namespaces
+## Step 4: Expose productpage service
 
-After installation, you have the infrastructure you need, but your namespaces 
-are not connected. 
+Console for namespace `bookinfo-pub`:
+
+    kubectl expose deployment/productpage-v1 --port 9080 --type LoadBalancer
+
+The Bookinfo application is accessed through an ingress port to the _productpage_ service.
+
+The productpage may be accessed but the page will show errors since the back end services are not yet available.
+Let's fix that now.
+
+## Step 5: Install Skupper
+
+Console for namespace `bookinfo-pvt`:
+
+    skupper init
+
+Console for namespace `bookinfo-pub`:
+
+    skupper init
+
+Use `skupper status` in each console to check that Skupper is
+installed.
+
+    $ skupper status
+    Namespace '<ns>' is ready.  It is connected to 0 other namespaces.
+
+As you move through the steps that follow, you can use `skupper
+status` at any time to check your progress.
+
+## Step 6: Connect your Skupper installations
+
+After installing Skupper you have the infrastructure you need but your namespaces 
+are not connected. You need to connect your Skupper installations.
 
 The ```skupper connection-token``` command generates a secret token that signifies permission 
 to connect to this namespace. The token also carries the network connection details so
@@ -173,7 +193,8 @@ Console for namespace `bookinfo-pvt`:
     skupper connect PVT-to-PUB-connection-token.yaml
 
 If your console sessions are on different machines, you may need to
-use `scp` or a similar tool to transfer the token.
+use `scp` or a similar tool to transfer the token to the system
+hosting the `bookinfo-pvt` console.
 
 ### Check the connection
 
@@ -187,7 +208,7 @@ Console for namespace `bookinfo-pvt`:
     $ skupper status
     Skupper enabled for "bookinfo-pvt". It is connected to 1 other sites.
 
-## Step 5: Expose your internal services via Skupper
+## Step 7: Virtualize your internal services via Skupper
 
 You now have a Skupper network capable of multi-cluster communication 
 but no services are yet associated with it. This step uses the ```kubectl annotate``` 
@@ -206,26 +227,17 @@ Console for namespace `bookinfo-pvt`:
     $ kubectl annotate service reviews skupper.io/proxy=http
     service/reviews annotated
 
-In this example the Skupper proxy type is _http_. Skupper also supports other proxy
-types. 
+Upon observing an annotation, Skupper virtualizes the annotated service to
+the Skupper network. Skupper proxies are created to route requests between
+the virtual services and the actual annotated service deployment instance.
 
-The service annotations are integral to 
-Upon observing the annotation Skupper propagates the annotated service to
-the Skupper network. Skupper proxies created to route the _reviews_, _details_, and
-_ratings_ http requests to the appropriate microservice instance from 
-anywhere in the Skupper network.
+Skupper makes the annotated services available to every namespace in the Skupper
+network. Now the Bookinfo application will work because the productpage service
+on the public cluster has access to the _details_ and _reviews_ services on
+the private cluster and because the _reviews_ service on the private cluster
+has access to the _ratings_ service on the public cluster.
 
-## Step 6: Expose main Bookinfo productpage application
-
-Console for namespace `bookinfo-pub`:
-
-    kubectl expose deployment/productpage-v1 --port 9080 --type LoadBalancer
-
-The _productpage_ service is exposed through an ingress route on a public cluster port.
-
-Now the Bookinfo app is fully functional.
-
-## Step 7: Open Bookinfo application
+## Step 8: Open Bookinfo application
 
 The web address for the Bookinfo app can be discovered from 
 the console for namespace `bookinfo-pub` cluster: 
