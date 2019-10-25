@@ -21,6 +21,8 @@ in namespace `bookinfo-pub`
 and
 the _details_ and _reviews_ services in a local, on-premises cluster in namespace `bookinfo-pvt`.
 
+A video of this demo is available at [https://youtu.be/MO12bk_nczM](https://youtu.be/MO12bk_nczM).
+
 ### Bookinfo Skupper Deployment
 
 <img src="graphics/skupper-example-bookinfo-deployment.gif" width="640"/>
