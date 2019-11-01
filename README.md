@@ -23,7 +23,7 @@ the _details_ and _reviews_ services in a local, on-premises cluster in namespac
 
 Watch a video demonstrating this tutorial:
 
-[![Distributing Bookinfo services across clusters with Skupper](<img src="graphics/video-thumbnail.png" width="640"/>)](https://youtu.be/MO12bk_nczM)
+[<img src="https://img.youtube.com/vi/MO12bk_nczM/hqdefault.jpg">](https://youtu.be/MO12bk_nczM)
 
 ### Table of contents
 * [Overview](#overview)
