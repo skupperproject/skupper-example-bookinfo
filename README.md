@@ -21,9 +21,9 @@ in namespace `aws-eu-west`
 and
 the _details_ and _reviews_ services in a local, on-premises cluster in namespace `laptop`.
 
-Watch a video demonstrating this tutorial:
+Watch a [video](https://youtu.be/MO12bk_nczM) demonstrating this tutorial:
 
-[<img src="https://img.youtube.com/vi/MO12bk_nczM/hqdefault.jpg">](https://youtu.be/MO12bk_nczM)
+[<img src="graphics/skupper-bookinfo-embedded.png">](https://youtu.be/MO12bk_nczM)
 
 ### Table of contents
 * [Overview](#overview)
@@ -42,9 +42,11 @@ Watch a video demonstrating this tutorial:
 
 ## Overview
 
+##### Figure 1 - Bookinfo service deployment
+
 <img src="graphics/skupper-example-bookinfo-deployment.gif" width="640"/>
 
-This picture shows how the services will be deployed.
+Figure 1 shows how the services will be deployed.
 
 * Each cluster runs two of the application services.
 
@@ -59,9 +61,11 @@ to _details_ or to _reviews_.
 This demo will show how Skupper can solve the connectivity problem presented
 by this arrangement of service deployments.
 
+##### Figure 2 - Bookinfo service deployment with Skupper
+
 <img src="graphics/skupper-example-bookinfo-details.gif" width="640"/>
 
-This picture shows how the clusters appear after Skupper has been set up.
+Figure 2 shows how the clusters appear after Skupper has been set up.
 
 Skupper is a distributed system with installations running
 in one or more clusters or namespaces. Connected Skupper installations share
@@ -91,13 +95,13 @@ To run this tutorial you will need:
 * The `skupper` command-line tool, the latest version ([installation guide](https://skupper.io/start/index.html#step-1-install-the-skupper-command-line-tool-in-your-environment))
 * Two Kubernetes namespaces, from any providers you choose, on any clusters you choose
 * The yaml files from https://github.com/skupperproject/skupper-examples-bookinfo.git
-* Two logged-in console terminals, one for each cluster
+* Two logged-in console terminals, one for each cluster or namespace
 
 ## Step 1: Deploy the Bookinfo application
 
 This step creates a service and a deployment for each of the four Bookinfo microservices.
 
-Console for namespace `aws-eu-west`:
+Namespace `aws-eu-west`:
 
     $ kubectl apply -f public-cloud.yaml
     service/productpage created
@@ -105,7 +109,7 @@ Console for namespace `aws-eu-west`:
     service/ratings created
     deployment.extensions/ratings-v1 created
 
-Console for namespace `laptop`:
+Namespace `laptop`:
 
     $ kubectl apply -f private-cloud.yaml 
     service/details created
@@ -115,7 +119,7 @@ Console for namespace `laptop`:
 
 ## Step 2: Expose the public productpage service
 
-Console for namespace `aws-eu-west`:
+Namespace `aws-eu-west`:
 
     kubectl expose deployment/productpage-v1 --port 9080 --type LoadBalancer
 
@@ -123,13 +127,13 @@ The Bookinfo application is accessed from the public internet through this ingre
 
 ## Step 3: Observe that the application does not work
 
-The web address for the Bookinfo app can be discovered from 
-the console for namespace `aws-eu-west` cluster: 
+The web address for the Bookinfo application can be discovered from 
+namespace `aws-eu-west`: 
 
     $ echo $(kubectl get service/productpage -o jsonpath='http://{.status.loadBalancer.ingress[0].hostname}:9080')
 
-Open the address in a web browser. The productpage responds but the page will show errors because the 
-back-end services are not yet available.
+Open the address in a web browser. _Productpage_ responds but the page will show errors because the 
+services in namespace `laptop` are not reachable.
 
 Let's fix that now.
 
@@ -137,16 +141,16 @@ Let's fix that now.
 
 This step initializes the Skupper environment on each cluster.
 
-Console for namespace `laptop`:
+Namespace `laptop`:
 
     skupper init
 
-Console for namespace `aws-eu-west`:
+Namespace `aws-eu-west`:
 
     skupper init
 
 Now the Skupper infrastructure is running. 
-Use `skupper status` in each console to see that Skupper is
+Use `skupper status` in each console terminal to see that Skupper is
 available.
 
     $ skupper status
@@ -157,44 +161,52 @@ status` at any time to check your progress.
 
 ## Step 5: Connect your Skupper installations
 
-Now you need Skupper to connect your namespaces. This is a two step process. 
+Now you need to connect your namespaces with a Skupper connection. 
+This is a two step process. 
 
-* The ```skupper connection-token``` command generates a secret token that signifies permission 
-to connect to this namespace. The token also carries the network connection details so
-that a connecting Skupper can find the Skupper that generated the token. 
+* The ```skupper connection-token <file>``` command directs Skupper 
+to open a network ingress and to generate a secret token file 
+with certificates that grant 
+permission to other Skupper instances to connect to the ingress. 
 
     Note: Protect this file as you would 
           any file that holds login credentials.
 
-* The ```skupper connect``` command uses the connection token to establish a connection to the 
-Skupper that generated it.
+* The ```skupper connect <file>``` command directs Skupper to connect to
+another Skupper's network ingress. This step completes the Skupper connection.
 
-The console sessions in this demo are run by the same user on the same host.
-This makes the token file in the ${HOME} directory available to both consoles.
-If your console sessions are on different machines then you may need to
+Note that in this arrangement the Skupper instances join to form peer networks.
+Typically the Skupper opening the ingress port will be on the public cluster.
+A cluster running on `laptop` may not even have an address that is reachable from
+the internet. Skupper network members are peers after the connection is made
+and it does not matter which Skupper opened the ingress and which connected. 
+
+The console terminals in this demo are run by the same user on the same host.
+This makes the token file in the ${HOME} directory available to both terminals.
+If your terminals are on different machines then you may need to
 use `scp` or a similar tool to transfer the token file to the system
-hosting the `laptop` console.
+hosting the `laptop` terminal.
 
-### Generate a connection token
+### Open a network ingress and generate a connection token
 
-Console for namespace `aws-eu-west`:
+Namespace `aws-eu-west`:
  
     skupper connection-token ${HOME}/PVT-to-PUB-connection-token.yaml
     
-### Use the token to form a connection
+### Open the connection
 
-Console for namespace `laptop`:
+Namespace `laptop`:
 
     skupper connect ${HOME}/PVT-to-PUB-connection-token.yaml
 
 ### Check the connection
 
-Console for namespace `aws-eu-west`:
+Namespace `aws-eu-west`:
 
     $ skupper status
     Skupper enabled for "aws-eu-west". It is connected to 1 other sites.
 
-Console for namespace `laptop`:
+Namespace `laptop`:
 
     $ skupper status
     Skupper enabled for "laptop". It is connected to 1 other sites.
@@ -202,7 +214,7 @@ Console for namespace `laptop`:
 ## Step 6: Virtualize the services you want shared
 
 You now have a Skupper network capable of multi-cluster communication 
-but no services are yet associated with it. This step uses the ```kubectl annotate``` 
+but no services are associated with it. This step uses the ```kubectl annotate``` 
 command to notify Skupper that a service is to be included in the Skupper network.
 
 Skupper uses the annotation as the indication that a service must be virtualized.
@@ -211,12 +223,12 @@ and the proxies that Skupper deploys in the other namespaces are the virtual tar
 for network requests. The Skupper infrastructure then routes requests between the 
 virtual services and the target service.
 
-Console for namespace `aws-eu-west`:
+Namespace `aws-eu-west`:
 
     $ kubectl annotate service ratings skupper.io/proxy=http
     service/ratings annotated
 
-Console for namespace `laptop`:
+Namespace `laptop`:
 
     $ kubectl annotate service details skupper.io/proxy=http
     service/details annotated
@@ -233,24 +245,22 @@ has access to the _ratings_ service on the public cluster.
 ## Step 7: Observe that the application works
 
 The web address for the Bookinfo app can be discovered from 
-the console for namespace `aws-eu-west` cluster: 
+namespace `aws-eu-west`: 
 
     $ echo $(kubectl get service/productpage -o jsonpath='http://{.status.loadBalancer.ingress[0].hostname}:9080')
 
-Open the address in a web browser.
-
-The _productpage_ now shows the entire application working with no errors.
+Open the address in a web browser. The application now works with no errors. 
 
 ## Clean up
 
 Skupper and the Bookinfo services may be removed from the clusters.
 
-Console for namespace `aws-eu-west`:
+Namespace `aws-eu-west`:
 
     skupper delete
     kubectl delete -f public-cloud.yaml
 
-Console for namespace `laptop`:
+Namespace `laptop`:
 
     skupper delete
     kubectl delete -f private-cloud.yaml 
