@@ -21,9 +21,9 @@ in namespace `aws-eu-west`
 and
 the _details_ and _reviews_ services in a local, on-premises cluster in namespace `laptop`.
 
-Watch a [video](https://youtu.be/MO12bk_nczM) demonstrating this tutorial:
+Watch a [video](https://www.youtube.com/watch?v=H80GLl-KdTc) demonstrating this tutorial:
 
-[<img src="graphics/skupper-bookinfo-embedded.png">](https://youtu.be/MO12bk_nczM)
+[<img src="graphics/skupper-bookinfo-embedded.png">](https://www.youtube.com/watch?v=H80GLl-KdTc)
 
 ### Table of contents
 * [Overview](#overview)
@@ -165,21 +165,21 @@ Now you need to connect your namespaces with a Skupper connection.
 This is a two step process. 
 
 * The ```skupper connection-token <file>``` command directs Skupper 
-to open a network ingress and to generate a secret token file 
+to generate a secret token file 
 with certificates that grant 
-permission to other Skupper instances to connect to the ingress. 
+permission to other Skupper instances to connect to this Skupper's network. 
 
     Note: Protect this file as you would 
           any file that holds login credentials.
 
 * The ```skupper connect <file>``` command directs Skupper to connect to
-another Skupper's network ingress. This step completes the Skupper connection.
+another Skupper's network. This step completes the Skupper connection.
 
 Note that in this arrangement the Skupper instances join to form peer networks.
-Typically the Skupper opening the ingress port will be on the public cluster.
+Typically the Skupper opening the network port will be on the public cluster.
 A cluster running on `laptop` may not even have an address that is reachable from
-the internet. Skupper network members are peers after the connection is made
-and it does not matter which Skupper opened the ingress and which connected. 
+the internet. After the connection is made the Skupper network members are peers
+and it does not matter which Skupper opened the network port and which connected to it. 
 
 The console terminals in this demo are run by the same user on the same host.
 This makes the token file in the ${HOME} directory available to both terminals.
@@ -187,13 +187,13 @@ If your terminals are on different machines then you may need to
 use `scp` or a similar tool to transfer the token file to the system
 hosting the `laptop` terminal.
 
-### Open a network ingress and generate a connection token
+### Generate a Skupper network connection token
 
 Namespace `aws-eu-west`:
  
     skupper connection-token ${HOME}/PVT-to-PUB-connection-token.yaml
     
-### Open the connection
+### Open a Skupper connection
 
 Namespace `laptop`:
 
