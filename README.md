@@ -93,9 +93,11 @@ To run this tutorial you will need:
 
 * The `kubectl` command-line tool, version 1.15 or later ([installation guide](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
 * The `skupper` command-line tool, the latest version ([installation guide](https://skupper.io/start/index.html#step-1-install-the-skupper-command-line-tool-in-your-environment))
+* The `oc` command-line tool, if using OKD for your public cluster ([installation guide](https://docs.okd.io/1.5/cli_reference/get_started_cli.html#installing-the-cli))
 * Two Kubernetes namespaces, from any providers you choose, on any clusters you choose
-* The yaml files from https://github.com/skupperproject/skupper-examples-bookinfo.git
+* The yaml files from https://github.com/skupperproject/skupper-example-bookinfo.git
 * Two logged-in console terminals, one for each cluster or namespace
+* If you are using `minikube` as your public cluster, run `$ minikube tunnel` in a separate terminal
 
 ## Step 1: Deploy the Bookinfo application
 
@@ -121,9 +123,14 @@ Namespace `laptop`:
 
 Namespace `aws-eu-west`:
 
-    kubectl expose deployment/productpage-v1 --port 9080 --type LoadBalancer
+    $ kubectl expose deployment/productpage-v1 --port 9080 --type LoadBalancer
 
 The Bookinfo application is accessed from the public internet through this ingress port to the _productpage_ service.
+
+If you are running your public cluster namespace `aws-eu-west` on OKD,
+then you might need to create a route:
+
+    $ oc create route edge productpage --service=productpage
 
 ## Step 3: Observe that the application does not work
 
@@ -132,7 +139,15 @@ namespace `aws-eu-west`:
 
     $ echo $(kubectl get service/productpage -o jsonpath='http://{.status.loadBalancer.ingress[0].hostname}:9080')
 
-Open the address in a web browser. _Productpage_ responds but the page will show errors because the 
+***If you are running a minikube cluster, then use:***
+
+    $ echo $(kubectl get service/productpage -o jsonpath='http://{.status.loadBalancer.ingress[0].ip}:9080')
+
+***If you are running an OKD cluster, then use:***
+
+    $ echo $(oc get route/productpage -o jsonpath='https://{.status.ingress[0].host}')
+
+Open the address in a web browser. _Productpage_ responds but the page will show errors because the
 services in namespace `laptop` are not reachable.
 
 Let's fix that now.
@@ -143,18 +158,18 @@ This step initializes the Skupper environment on each cluster.
 
 Namespace `laptop`:
 
-    skupper init
+    $ skupper init
 
 Namespace `aws-eu-west`:
 
-    skupper init
+    $ skupper init
 
 Now the Skupper infrastructure is running. 
 Use `skupper status` in each console terminal to see that Skupper is
 available.
 
     $ skupper status
-    Namespace '<ns>' is ready.  It is connected to 0 other namespaces.
+    Skupper is enabled for namespace '"<ns>" in interior mode'. It is not connected to any other sites. It has no exposed services.
 
 As you move through the steps that follow, you can use `skupper
 status` at any time to check your progress.
@@ -191,25 +206,25 @@ hosting the `laptop` terminal.
 
 Namespace `aws-eu-west`:
  
-    skupper connection-token ${HOME}/PVT-to-PUB-connection-token.yaml
+    $ skupper connection-token ${HOME}/PVT-to-PUB-connection-token.yaml
     
 ### Open a Skupper connection
 
 Namespace `laptop`:
 
-    skupper connect ${HOME}/PVT-to-PUB-connection-token.yaml
+    $ skupper connect ${HOME}/PVT-to-PUB-connection-token.yaml
 
 ### Check the connection
 
 Namespace `aws-eu-west`:
 
     $ skupper status
-    Skupper enabled for "aws-eu-west". It is connected to 1 other sites.
+    Skupper is enabled for namespace '"aws-eu-west" in interior mode'. It is connected to 1 other site. It has no exposed service.
 
 Namespace `laptop`:
 
     $ skupper status
-    Skupper enabled for "laptop". It is connected to 1 other sites.
+    Skupper is enabled for namespace '"laptop" in interior mode'. It is connected to 1 other site. It has no exposed service.
 
 ## Step 6: Virtualize the services you want shared
 
@@ -248,6 +263,14 @@ The web address for the Bookinfo app can be discovered from
 namespace `aws-eu-west`: 
 
     $ echo $(kubectl get service/productpage -o jsonpath='http://{.status.loadBalancer.ingress[0].hostname}:9080')
+
+***If you are running a minikube cluster, then use:***
+
+    $ echo $(kubectl get service/productpage -o jsonpath='http://{.status.loadBalancer.ingress[0].ip}:9080')
+
+***If you are running an OKD cluster, then use:***
+
+    $ echo $(oc get route/productpage -o jsonpath='https://{.status.ingress[0].host}')
 
 Open the address in a web browser. The application now works with no errors. 
 
