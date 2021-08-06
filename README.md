@@ -179,7 +179,7 @@ status` at any time to check your progress.
 Now you need to connect your namespaces with a Skupper connection. 
 This is a two step process. 
 
-* The ```skupper connection-token <file>``` command directs Skupper 
+* The ```skupper token create <file>``` command directs Skupper 
 to generate a secret token file 
 with certificates that grant 
 permission to other Skupper instances to connect to this Skupper's network. 
@@ -187,7 +187,7 @@ permission to other Skupper instances to connect to this Skupper's network.
     Note: Protect this file as you would 
           any file that holds login credentials.
 
-* The ```skupper connect <file>``` command directs Skupper to connect to
+* The ```skupper link create <file>``` command directs Skupper to connect to
 another Skupper's network. This step completes the Skupper connection.
 
 Note that in this arrangement the Skupper instances join to form peer networks.
@@ -206,13 +206,13 @@ hosting the `laptop` terminal.
 
 Namespace `aws-eu-west`:
  
-    $ skupper connection-token ${HOME}/PVT-to-PUB-connection-token.yaml
+    $ skupper token create ${HOME}/PVT-to-PUB-connection-token.yaml
     
 ### Open a Skupper connection
 
 Namespace `laptop`:
 
-    $ skupper connect ${HOME}/PVT-to-PUB-connection-token.yaml
+    $ skupper link create ${HOME}/PVT-to-PUB-connection-token.yaml
 
 ### Check the connection
 
@@ -250,6 +250,21 @@ Namespace `laptop`:
     
     $ kubectl annotate service reviews skupper.io/proxy=http
     service/reviews annotated
+
+Alternatively, Skupper command `expose` can be used as well:
+
+Namespace `aws-eu-west`:
+
+    $ skupper expose service ratings --address ratings --protocol http
+    service ratings exposed as ratings
+
+Namespace `laptop`:
+
+    $ skupper expose service details --address details --protocol http
+    service details exposed as details
+
+    $ skupper expose service reviews --address reviews --protocol http
+    service reviews exposed as reviews
 
 Skupper is now making the annotated services available to every namespace in the Skupper
 network. The Bookinfo application will work because the _productpage_ service
