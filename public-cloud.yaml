@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: productpage
-        image: docker.io/istio/examples-bookinfo-productpage-v1:1.19.1
+        image: mirror.gcr.io/istio/examples-bookinfo-productpage-v1:1.19.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
@@ -78,7 +78,7 @@ spec:
     spec:
       containers:
       - name: ratings
-        image: docker.io/istio/examples-bookinfo-ratings-v1:1.19.1
+        image: mirror.gcr.io/istio/examples-bookinfo-ratings-v1:1.19.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
